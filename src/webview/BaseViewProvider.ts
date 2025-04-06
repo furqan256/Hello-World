@@ -1,41 +1,54 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
-    protected _view?: vscode.WebviewView;
+  protected _view?: vscode.WebviewView;
+  protected readonly _disposables: vscode.Disposable[] = [];
 
-    constructor(protected readonly _extensionUri: vscode.Uri) {}
+  constructor(protected readonly _extensionUri: vscode.Uri) {}
 
-    public resolveWebviewView(
-        webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
-        _token: vscode.CancellationToken,
-    ) {
-        this._view = webviewView;
+  public resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    _context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken
+  ) {
+    this._view = webviewView;
 
-        webviewView.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [this._extensionUri]
-        };
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [this._extensionUri],
+    };
 
-        this._view.webview.html = this.getHtmlContent(webviewView.webview);
+    this._view.webview.html = this.getHtmlContent(webviewView.webview);
 
-        this.setWebviewMessageListener(webviewView.webview);
+    this.setWebviewMessageListener(webviewView.webview);
+  }
+
+  protected abstract getHtmlContent(webview: vscode.Webview): string;
+
+  protected abstract setWebviewMessageListener(webview: vscode.Webview): void;
+
+  protected getUri(webview: vscode.Webview, ...pathList: string[]) {
+    return webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, ...pathList)
+    );
+  }
+
+  protected getNonce() {
+    let text = "";
+    const possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (let i = 0; i < 32; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
+    return text;
+  }
 
-    protected abstract getHtmlContent(webview: vscode.Webview): string;
-    
-    protected abstract setWebviewMessageListener(webview: vscode.Webview): void;
-
-    protected getUri(webview: vscode.Webview, ...pathList: string[]) {
-        return webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, ...pathList));
+  public dispose() {
+    while (this._disposables.length) {
+      const disposable = this._disposables.pop();
+      if (disposable) {
+        disposable.dispose();
+      }
     }
-
-    protected getNonce() {
-        let text = '';
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 32; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return text;
-    }
+  }
 }

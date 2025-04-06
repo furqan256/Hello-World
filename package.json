@@ -3,6 +3,13 @@
   "displayName": "AI Code Assistant",
   "description": "An open-source, provider-agnostic alternative to GitHub Copilot with advanced features",
   "version": "0.0.1",
+  "publisher": "ai-code-assistant",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-code-assistant/vscode-extension"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -11,6 +18,13 @@
     "Machine Learning",
     "Snippets",
     "Other"
+  ],
+  "keywords": [
+    "ai",
+    "code-assistant",
+    "copilot",
+    "openai",
+    "huggingface"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -36,7 +50,7 @@
         {
           "id": "ai-code-assistant",
           "title": "AI Code Assistant",
-          "icon": "resources/icon.svg"
+          "icon": "$(symbol-interface)"
         }
       ]
     },
@@ -85,6 +99,7 @@
     "@types/node": "20.x",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/vsce": "^2.15.0",
     "eslint": "^8.56.0",
     "glob": "^10.3.10",
     "mocha": "^10.2.0",
