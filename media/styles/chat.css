@@ -1,108 +1,325 @@
-:root {
-    --container-padding: 20px;
-    --input-padding-vertical: 6px;
-    --input-padding-horizontal: 4px;
-    --input-margin-vertical: 4px;
-    --input-margin-horizontal: 0;
-}
-
-body {
-    padding: 0;
-    margin: 0;
-    color: var(--vscode-foreground);
-    font-size: var(--vscode-font-size);
-    font-weight: var(--vscode-font-weight);
-    font-family: var(--vscode-font-family);
-    background-color: var(--vscode-editor-background);
-}
-
 #chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    padding: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+}
+
+#chat-header {
+  padding: 10px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--vscode-editor-background);
+}
+
+#provider-info,
+#model-info {
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground);
+}
+
+#context-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+}
+
+.context-file {
+  color: var(--vscode-textLink-foreground);
+}
+
+.context-selection {
+  background-color: var(--vscode-editor-selectionBackground);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8em;
+}
+
+.context-remove {
+  background: none;
+  border: none;
+  color: var(--vscode-icon-foreground);
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.context-remove:hover {
+  color: var(--vscode-errorForeground);
 }
 
 #messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    padding: 10px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
 }
 
 .message {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-radius: 6px;
-    max-width: 80%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 6px;
+  max-width: 85%;
 }
 
 .message.user {
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    margin-left: auto;
+  background-color: var(--vscode-editor-selectionBackground);
+  margin-left: auto;
 }
 
 .message.assistant {
-    background-color: var(--vscode-editor-inactiveSelectionBackground);
-    color: var(--vscode-foreground);
-    margin-right: auto;
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  margin-right: auto;
+}
+
+.message.error {
+  background-color: var(--vscode-inputValidation-errorBackground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.message-content {
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.message-content code {
+  font-family: var(--vscode-editor-font-family);
+  background-color: var(--vscode-textCodeBlock-background);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.message-content pre {
+  margin: 10px 0;
+  background-color: var(--vscode-textCodeBlock-background);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.code-block {
+  position: relative;
+  margin: 10px 0;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background-color: var(--vscode-textCodeBlock-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.code-language {
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.copy-button {
+  background: none;
+  border: 1px solid var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  padding: 2px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.copy-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.code-block code {
+  display: block;
+  padding: 10px;
+  overflow-x: auto;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+}
+
+#suggestions {
+  padding: 10px;
+  border-top: 1px solid var(--vscode-panel-border);
+  background-color: var(--vscode-editor-background);
+}
+
+.suggestion-header {
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 5px;
+}
+
+.suggestion {
+  padding: 6px 10px;
+  margin: 4px 0;
+  background-color: var(--vscode-editor-selectionBackground);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.suggestion:hover {
+  background-color: var(--vscode-list-hoverBackground);
 }
 
 #input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px;
-    background-color: var(--vscode-editor-background);
-    border-top: 1px solid var(--vscode-widget-border);
+  padding: 10px;
+  border-top: 1px solid var(--vscode-panel-border);
+  background-color: var(--vscode-editor-background);
+}
+
+#message-box {
+  position: relative;
+  margin-bottom: 10px;
 }
 
 #message-input {
-    resize: vertical;
-    min-height: 60px;
-    max-height: 200px;
-    padding: 8px;
-    border: 1px solid var(--vscode-input-border);
-    background-color: var(--vscode-input-background);
-    color: var(--vscode-input-foreground);
-    border-radius: 4px;
+  width: 100%;
+  padding: 8px;
+  padding-right: 40px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: var(--vscode-font-family);
+  resize: vertical;
+}
+
+#message-input:focus {
+  outline: none;
+  border-color: var(--vscode-focusBorder);
+}
+
+#input-actions {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+#input-actions button {
+  background: none;
+  border: none;
+  color: var(--vscode-icon-foreground);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+}
+
+#input-actions button:hover {
+  background-color: var(--vscode-toolbar-hoverBackground);
 }
 
 #button-container {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 10px;
 }
 
 button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    cursor: pointer;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
 }
 
-button:hover {
-    background-color: var(--vscode-button-hoverBackground);
+button.primary {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
 }
 
-#voice-button {
-    width: 40px;
-    padding: 8px;
+button.primary:hover {
+  background-color: var(--vscode-button-hoverBackground);
 }
 
-.timestamp {
-    font-size: 0.8em;
-    color: var(--vscode-descriptionForeground);
-    margin-top: 4px;
+button.danger {
+  background-color: var(--vscode-errorForeground);
+  color: var(--vscode-button-foreground);
 }
 
-.error {
-    color: var(--vscode-errorForeground);
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 4px;
-    background-color: var(--vscode-inputValidation-errorBackground);
-    border: 1px solid var(--vscode-inputValidation-errorBorder);
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.loading-dots span {
+  width: 4px;
+  height: 4px;
+  background-color: var(--vscode-editor-foreground);
+  border-radius: 50%;
+  animation: dots 1.4s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dots {
+  0%,
+  100% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: var(--vscode-notificationToast-background);
+  color: var(--vscode-notificationToast-foreground);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }

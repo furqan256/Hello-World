@@ -1,0 +1,83 @@
+#editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+}
+
+#suggestion-details {
+  padding: 10px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  background-color: var(--vscode-editor-background);
+}
+
+.suggestion {
+  margin: 5px 0;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--vscode-editor-selectionBackground);
+}
+
+.suggestion:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.suggestion-button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 2px;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+}
+
+.suggestion-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.suggestion-explanation {
+  font-size: 0.9em;
+  margin-top: 5px;
+  padding: 5px;
+  border-left: 2px solid var(--vscode-textLink-foreground);
+  background-color: var(--vscode-editor-background);
+}
+
+.code-block {
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 4px;
+  background-color: var(--vscode-textCodeBlock-background);
+  overflow-x: auto;
+}
+
+.optimization-diff {
+  padding: 5px;
+  background-color: var(--vscode-diffEditor-insertedLineBackground);
+  border-left: 2px solid var(--vscode-diffEditor-insertedTextBorder);
+}
+
+.error {
+  color: var(--vscode-errorForeground);
+  background-color: var(--vscode-inputValidation-errorBackground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  padding: 5px;
+  margin: 5px 0;
+  border-radius: 2px;
+}

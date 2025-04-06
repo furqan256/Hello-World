@@ -43,6 +43,38 @@
       {
         "command": "ai-code-assistant.toggleVoiceInput",
         "title": "AI Assistant: Toggle Voice Input"
+      },
+      {
+        "command": "ai-code-assistant.suggestCompletion",
+        "title": "AI Assistant: Suggest Code Completion"
+      },
+      {
+        "command": "ai-code-assistant.explainCode",
+        "title": "AI Assistant: Explain Code"
+      },
+      {
+        "command": "ai-code-assistant.optimizeCode",
+        "title": "AI Assistant: Optimize Code"
+      },
+      {
+        "command": "ai-code-assistant.startRefactor",
+        "title": "AI Assistant: Start Refactoring Task"
+      },
+      {
+        "command": "ai-code-assistant.startDocumentation",
+        "title": "AI Assistant: Generate Documentation"
+      },
+      {
+        "command": "ai-code-assistant.stopCurrentTask",
+        "title": "AI Assistant: Stop Current Task"
+      },
+      {
+        "command": "ai-code-assistant.contextExplain",
+        "title": "Explain Code"
+      },
+      {
+        "command": "ai-code-assistant.contextOptimize",
+        "title": "Optimize Code"
       }
     ],
     "viewsContainers": {
@@ -61,11 +93,46 @@
           "name": "Chat"
         },
         {
+          "id": "aiEditView",
+          "name": "Editor"
+        },
+        {
+          "id": "aiAgentView",
+          "name": "Agent"
+        },
+        {
           "id": "aiSettingsView",
           "name": "Settings"
         }
       ]
     },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ai-code-assistant.contextExplain",
+          "when": "editorHasSelection",
+          "group": "ai-code-assistant@1"
+        },
+        {
+          "command": "ai-code-assistant.contextOptimize",
+          "when": "editorHasSelection",
+          "group": "ai-code-assistant@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "ai-code-assistant.suggestCompletion",
+        "key": "ctrl+shift+space",
+        "mac": "cmd+shift+space",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ai-code-assistant.toggleVoiceInput",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v"
+      }
+    ],
     "configuration": {
       "title": "AI Code Assistant",
       "properties": {

@@ -1,143 +1,311 @@
 (function () {
-    // Get VS Code webview API
-    const vscode = acquireVsCodeApi();
-    
-    const messagesContainer = document.getElementById('messages');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const voiceButton = document.getElementById('voice-button');
+  const vscode = acquireVsCodeApi();
+  let isProcessing = false;
 
-    let isRecording = false;
-    let messages = [];
+  // Initialize UI elements
+  const messagesContainer = document.getElementById("messages");
+  const messageInput = document.getElementById("message-input");
+  const sendButton = document.getElementById("send-button");
+  const stopButton = document.getElementById("stop-button");
+  const clearButton = document.getElementById("clear-button");
+  const voiceButton = document.getElementById("voice-button");
+  const copyButton = document.getElementById("copy-button");
+  const contextButton = document.getElementById("context-button");
+  const providerInfo = document.getElementById("provider-info");
+  const modelInfo = document.getElementById("model-info");
+  const contextInfo = document.getElementById("context-info");
+  const suggestionList = document.getElementById("suggestion-list");
 
-    // Initialize speech recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
+  // Initialize event listeners
+  messageInput.addEventListener("keydown", handleInputKeydown);
+  sendButton.addEventListener("click", sendMessage);
+  stopButton.addEventListener("click", stopGeneration);
+  clearButton.addEventListener("click", clearChat);
+  voiceButton.addEventListener("click", toggleVoiceInput);
+  copyButton.addEventListener("click", copyLastResponse);
+  contextButton.addEventListener("click", addFileContext);
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            messageInput.value = transcript;
-        };
+  // Handle incoming messages from extension
+  window.addEventListener("message", (event) => {
+    const message = event.data;
 
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            stopRecording();
-        };
+    switch (message.type) {
+      case "initialize":
+        initializeChat(message.content);
+        break;
+      case "addMessage":
+        addMessage(message.content);
+        break;
+      case "updateMessage":
+        updateMessage(message.content);
+        break;
+      case "updateContext":
+        updateContextInfo(message.content);
+        break;
+      case "updateSuggestions":
+        updateSuggestions(message.content);
+        break;
+      case "notification":
+        showNotification(message.content);
+        break;
+      case "error":
+        showError(message.content);
+        break;
+      case "clearChat":
+        clearChatUI();
+        break;
+    }
+  });
 
-        recognition.onend = () => {
-            stopRecording();
-        };
+  function initializeChat({ provider, messages, context }) {
+    // Set provider info
+    if (provider) {
+      providerInfo.textContent = provider.name;
+      modelInfo.textContent = provider.model;
     }
 
-    // Handle sending messages
-    function sendMessage() {
-        const content = messageInput.value.trim();
-        if (content) {
-            vscode.postMessage({
-                type: 'sendMessage',
-                content
-            });
-            messageInput.value = '';
-        }
+    // Load messages
+    if (messages) {
+      messages.forEach(addMessage);
     }
 
-    // Create and append message element
-    function appendMessage(message) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', message.role);
-        
-        const contentElement = document.createElement('div');
-        contentElement.classList.add('content');
-        contentElement.textContent = message.content;
-        
-        const timestampElement = document.createElement('div');
-        timestampElement.classList.add('timestamp');
-        timestampElement.textContent = new Date(message.timestamp).toLocaleTimeString();
-        
-        messageElement.appendChild(contentElement);
-        messageElement.appendChild(timestampElement);
-        messagesContainer.appendChild(messageElement);
-        
-        // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        messages.push(message);
+    // Set context
+    if (context) {
+      updateContextInfo(context);
+    }
+  }
+
+  function addMessage(message) {
+    const messageElement = createMessageElement(message);
+    messagesContainer.appendChild(messageElement);
+    scrollToBottom();
+  }
+
+  function updateMessage(message) {
+    const existingMessage = document.querySelector(
+      `[data-message-id="${message.id}"]`
+    );
+    if (existingMessage) {
+      existingMessage.replaceWith(createMessageElement(message));
+    }
+    scrollToBottom();
+
+    if (message.status === "received") {
+      isProcessing = false;
+      updateUI();
+    }
+  }
+
+  function createMessageElement(message) {
+    const element = document.createElement("div");
+    element.className = `message ${message.role} ${message.status || ""}`;
+    element.setAttribute("data-message-id", message.id);
+
+    const header = document.createElement("div");
+    header.className = "message-header";
+
+    const role = document.createElement("span");
+    role.className = "message-role";
+    role.textContent = message.role === "user" ? "You" : "Assistant";
+
+    const time = document.createElement("span");
+    time.className = "message-time";
+    time.textContent = new Date(message.timestamp).toLocaleTimeString();
+
+    header.appendChild(role);
+    header.appendChild(time);
+
+    const content = document.createElement("div");
+    content.className = "message-content";
+
+    if (message.status === "sending") {
+      content.innerHTML = `<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>`;
+    } else if (message.status === "error") {
+      content.innerHTML = `<div class="error-message">${message.error}</div>`;
+    } else {
+      content.innerHTML = markdownToHtml(message.content);
     }
 
-    // Handle voice input
-    function toggleRecording() {
-        if (!recognition) {
-            vscode.postMessage({
-                type: 'error',
-                message: 'Speech recognition is not supported in your browser.'
-            });
-            return;
-        }
+    element.appendChild(header);
+    element.appendChild(content);
 
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
+    return element;
+  }
+
+  function updateContextInfo(context) {
+    if (!context) {
+      contextInfo.innerHTML = "";
+      contextButton.classList.remove("active");
+      return;
     }
 
-    function startRecording() {
-        isRecording = true;
-        voiceButton.style.backgroundColor = 'var(--vscode-inputValidation-errorBackground)';
-        recognition.start();
+    contextInfo.innerHTML = `
+      <span class="context-file">${context.filename}</span>
+      ${
+        context.hasSelection
+          ? '<span class="context-selection">Selection</span>'
+          : ""
+      }
+      <button class="context-remove" onclick="removeContext()">✕</button>
+    `;
+    contextButton.classList.add("active");
+  }
+
+  function updateSuggestions(suggestions) {
+    suggestionList.innerHTML = suggestions
+      .map(
+        (suggestion) => `
+          <div class="suggestion" onclick="useSuggestion('${encodeURIComponent(
+            suggestion
+          )}')">
+            ${suggestion}
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  function handleInputKeydown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendMessage() {
+    if (isProcessing || !messageInput.value.trim()) {
+      return;
     }
 
-    function stopRecording() {
-        isRecording = false;
-        voiceButton.style.backgroundColor = '';
-        recognition.stop();
-    }
+    isProcessing = true;
+    updateUI();
 
-    // Event listeners
-    sendButton.addEventListener('click', sendMessage);
-    
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
+    vscode.postMessage({
+      type: "sendMessage",
+      content: messageInput.value,
     });
 
-    voiceButton.addEventListener('click', toggleRecording);
+    messageInput.value = "";
+  }
 
-    // Handle messages from extension
-    window.addEventListener('message', (event) => {
-        const message = event.data;
-        switch (message.type) {
-            case 'addMessage':
-                appendMessage(message.message);
-                break;
-            case 'error':
-                showError(message.message);
-                break;
-        }
-    });
+  function stopGeneration() {
+    isProcessing = false;
+    updateUI();
+    // Implement stop generation logic
+  }
 
-    function showError(message) {
-        const errorElement = document.createElement('div');
-        errorElement.classList.add('error');
-        errorElement.textContent = message;
-        messagesContainer.appendChild(errorElement);
-        setTimeout(() => errorElement.remove(), 5000);
-    }
+  function clearChat() {
+    vscode.postMessage({ type: "clearChat" });
+  }
 
-    // Keep webview state
-    window.addEventListener('beforeunload', () => {
-        vscode.setState({ messages });
-    });
+  function clearChatUI() {
+    messagesContainer.innerHTML = "";
+    suggestionList.innerHTML = "";
+  }
 
-    // Restore previous state
-    const previousState = vscode.getState();
-    if (previousState && previousState.messages) {
-        previousState.messages.forEach(appendMessage);
-    }
+  function toggleVoiceInput() {
+    vscode.postMessage({ type: "toggleVoiceInput" });
+  }
+
+  function copyLastResponse() {
+    vscode.postMessage({ type: "copyLastResponse" });
+  }
+
+  function addFileContext() {
+    vscode.postMessage({ type: "addFileContext" });
+  }
+
+  function removeContext() {
+    vscode.postMessage({ type: "removeContext" });
+  }
+
+  function useSuggestion(suggestion) {
+    messageInput.value = decodeURIComponent(suggestion);
+    sendMessage();
+  }
+
+  function updateUI() {
+    sendButton.style.display = isProcessing ? "none" : "inline-flex";
+    stopButton.style.display = isProcessing ? "inline-flex" : "none";
+    messageInput.disabled = isProcessing;
+    voiceButton.disabled = isProcessing;
+  }
+
+  function markdownToHtml(markdown) {
+    // Simple markdown to HTML conversion
+    return markdown
+      .replace(
+        /```(\w*)\n([\s\S]*?)```/g,
+        (_, lang, code) => `
+        <pre class="code-block${lang ? ` language-${lang}` : ""}">
+          <div class="code-header">
+            ${lang ? `<span class="code-language">${lang}</span>` : ""}
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+          </div>
+          <code>${escapeHtml(code.trim())}</code>
+        </pre>
+      `
+      )
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+      .replace(/\n/g, "<br>");
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function scrollToBottom() {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  function showNotification(message) {
+    const notification = document.createElement("div");
+    notification.className = "notification";
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  function showError(message) {
+    const error = document.createElement("div");
+    error.className = "error-message";
+    error.textContent = message;
+    messagesContainer.appendChild(error);
+    scrollToBottom();
+  }
+
+  // Initialize
+  vscode.postMessage({ type: "initialize" });
 })();
+
+// Global functions for event handlers
+window.removeContext = function () {
+  vscode.postMessage({ type: "removeContext" });
+};
+
+window.useSuggestion = function (suggestion) {
+  const messageInput = document.getElementById("message-input");
+  messageInput.value = decodeURIComponent(suggestion);
+  document.getElementById("send-button").click();
+};
+
+window.copyCode = function (button) {
+  const codeBlock = button.parentElement.nextElementSibling;
+  const code = codeBlock.textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    button.textContent = "Copied!";
+    setTimeout(() => {
+      button.textContent = "Copy";
+    }, 2000);
+  });
+};
