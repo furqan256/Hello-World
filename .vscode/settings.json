@@ -1,37 +1,36 @@
 {
-    "files.exclude": {
-        "out": false,
-        "dist": false
-    },
-    "search.exclude": {
-        "out": true,
-        "dist": true
-    },
-    "typescript.tsc.autoDetect": "off",
-    "typescript.preferences.importModuleSpecifier": "relative",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-    },
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "eslint.validate": [
-        "typescript"
-    ],
-    "files.insertFinalNewline": true,
-    "files.trimTrailingWhitespace": true,
-    "[typescript]": {
-        "editor.tabSize": 4,
-        "editor.detectIndentation": false
-    },
-    "[javascript]": {
-        "editor.tabSize": 4,
-        "editor.detectIndentation": false
-    },
-    "[json]": {
-        "editor.tabSize": 2,
-        "editor.detectIndentation": false
-    },
-    "jest.autoRun": "off",
-    "git.ignoreLimitWarning": true,
-    "typescript.tsdk": "node_modules/typescript/lib"
+  "files.exclude": {
+    "out": false,
+    "dist": false
+  },
+  "search.exclude": {
+    "out": true,
+    "dist": true
+  },
+  "typescript.tsc.autoDetect": "off",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.validate": ["typescript"],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "[typescript]": {
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false
+  },
+  "[javascript]": {
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false
+  },
+  "jest.autoRun": "off",
+  "git.ignoreLimitWarning": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cline.chromeExecutablePath": ""
 }
